@@ -1,5 +1,8 @@
 package com.stonybrook.videoplayer;
 
+import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -21,6 +24,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.stonybrook.videoplayer.listeners.AccelerometerListener;
+import com.stonybrook.videoplayer.listeners.GyroscopeListener;
+import com.stonybrook.videoplayer.listeners.LightSensorListener;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "TAG";
@@ -28,15 +34,71 @@ public class MainActivity extends AppCompatActivity {
     VideoAdapter adapter;
     List<Video> all_videos;
 
+
+    private SensorManager sensorManager;
+
+    private Sensor gyroscope;
+
+    private Sensor accelerometer;
+
+    private Sensor lightSensor;
+
+    private AccelerometerListener accelerometerListener;
+
+    private GyroscopeListener gyroscopeListener;
+
+    private LightSensorListener lightSensorListener;
+
+    public boolean isHasStartedWriting() {
+        return hasStartedWriting;
+    }
+
+    public void setHasStartedWriting(boolean hasStartedWriting) {
+        this.hasStartedWriting = hasStartedWriting;
+    }
+
+    private boolean hasStartedWriting=false;
+
+    public static final String LIGHT_SENSOR_FILE_NAME="light_sensor_data.csv";
+
+    public static final String GYRO_SENSOR_FILE_NAME="gyro_sensor_data.csv";
+
+    public static final String ACCELEROMETER_SENSOR_FILE_NAME="accelerometer_sensor_data.csv";
+
+    private int STORAGE_PERMISSION_CODE = 1;
+
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        sensorManager=(SensorManager)getSystemService(Context.SENSOR_SERVICE);
+
+        accelerometer=sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+
+        gyroscope=sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+
+        lightSensor=sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+
+        accelerometerListener=new AccelerometerListener(this);
+
+        gyroscopeListener=new GyroscopeListener(this);
+
+        lightSensorListener=new LightSensorListener(this);
+
+        sensorManager.registerListener(accelerometerListener,accelerometer,SensorManager.SENSOR_DELAY_NORMAL);
+
+        sensorManager.registerListener(gyroscopeListener,gyroscope,SensorManager.SENSOR_DELAY_NORMAL);
+
+
         all_videos = new ArrayList<>();
 
         videoList = findViewById(R.id.videoList);
         videoList.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new VideoAdapter(this,all_videos);
+        adapter = new VideoAdapter(this,all_videos,this);
         videoList.setAdapter(adapter);
         getJsonData();
 

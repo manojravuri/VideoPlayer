@@ -58,7 +58,7 @@ public class Player extends AppCompatActivity {
         Uri videoUrl = Uri.parse(v.getVideoUrl());
         videoPlayer.setVideoURI(videoUrl);
         MediaController mc = new MediaController(this);
-        videoPlayer.setMediaController(mc);
+        //videoPlayer.setMediaController(mc);
 
         videoPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
@@ -68,9 +68,27 @@ public class Player extends AppCompatActivity {
             }
         });
 
+        videoPlayer.setOnClickListener(new VideoView.OnClickListener()
+        {
+            @Override
+            public void onClick(View view) {
+                if(videoPlayer.isPlaying())
+                {
+
+                    videoPlayer.pause();
+                }
+                else
+                {
+                    videoPlayer.start();
+                }
+            }
+        });
+
+
         fullScreenOp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(TAG, "Clicked on play");
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
                 getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
                 getSupportActionBar().hide();

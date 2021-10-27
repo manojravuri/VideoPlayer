@@ -20,10 +20,12 @@ import java.util.List;
 public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.ViewHolder> {
     private List<Video> allVideos;
     private Context context;
+    private MainActivity mainActivity;
 
-    public VideoAdapter(Context ctx, List<Video> videos){
+    public VideoAdapter(Context ctx, List<Video> videos,MainActivity mainActivity){
         this.allVideos = videos;
         this.context = ctx;
+        this.mainActivity=mainActivity;
     }
 
 
