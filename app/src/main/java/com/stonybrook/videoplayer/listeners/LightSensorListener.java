@@ -14,30 +14,24 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
+
 public class LightSensorListener implements SensorEventListener {
 
     String TAG="lightsensorLog";
 
-    MainActivity mainActivity;
+    Player mainActivity;
 
-    public Player getPlayer() {
-        return player;
-    }
-
-    public void setPlayer(Player player) {
-        this.player = player;
-    }
-
-    Player player;
-
-    public LightSensorListener(MainActivity mainActivity)
+    public LightSensorListener(Player mainActivity)
     {
         this.mainActivity=mainActivity;
     }
 
     @Override
     public void onSensorChanged(SensorEvent sensorEvent)  {
-        Log.d(TAG, "light sensor change: X:"+sensorEvent.values[0]+"  Y:"+sensorEvent.values[1]+"Z:  "+sensorEvent.values[2]);
+        Log.d(TAG, "light sensor change:"+sensorEvent.values[0]);
         if(mainActivity.isHasStartedWriting())
         {
             String baseDir = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
@@ -59,10 +53,13 @@ public class LightSensorListener implements SensorEventListener {
                 }
 
                 float[] sensorValues = (sensorEvent.values);
-                String[] data=new String[sensorValues.length];
+                String[] data=new String[sensorValues.length+1];
+                SimpleDateFormat jdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS z");
+                jdf.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+                data[0] = jdf.format(new Date(System.currentTimeMillis()));
                 for(int i=0;i<sensorValues.length;i++)
                 {
-                    data[i]=String.valueOf(sensorValues[i]);
+                    data[i+1]=String.valueOf(sensorValues[i]);
                 }
                 writer.writeNext(data);
 

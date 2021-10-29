@@ -1,12 +1,20 @@
 package com.stonybrook.videoplayer;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -75,23 +83,36 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        sensorManager=(SensorManager)getSystemService(Context.SENSOR_SERVICE);
+        if (ContextCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+        ) {
+            /////Toast.makeText(MainActivity.this, "You have already granted this permission!",
+            //      Toast.LENGTH_SHORT).show();
+        } else {
+            requestStoragePermission();
+        }
 
-        accelerometer=sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-
-        gyroscope=sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-
-        lightSensor=sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
-
-        accelerometerListener=new AccelerometerListener(this);
-
-        gyroscopeListener=new GyroscopeListener(this);
-
-        lightSensorListener=new LightSensorListener(this);
-
-        sensorManager.registerListener(accelerometerListener,accelerometer,SensorManager.SENSOR_DELAY_NORMAL);
-
-        sensorManager.registerListener(gyroscopeListener,gyroscope,SensorManager.SENSOR_DELAY_NORMAL);
+//        sensorManager=(SensorManager)getSystemService(Context.SENSOR_SERVICE);
+//
+//        accelerometer=sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+//
+//        gyroscope=sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+//
+//        lightSensor=sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+//
+//        accelerometerListener=new AccelerometerListener(this);
+//
+//        gyroscopeListener=new GyroscopeListener(this);
+//
+//        lightSensorListener=new LightSensorListener(this);
+//
+//        sensorManager.registerListener(accelerometerListener,accelerometer,SensorManager.SENSOR_DELAY_NORMAL);
+//
+//        sensorManager.registerListener(gyroscopeListener,gyroscope,SensorManager.SENSOR_DELAY_NORMAL);
+//
+//        sensorManager.registerListener(lightSensorListener,lightSensor,SensorManager.SENSOR_DELAY_NORMAL);
 
 
         all_videos = new ArrayList<>();
@@ -102,6 +123,49 @@ public class MainActivity extends AppCompatActivity {
         videoList.setAdapter(adapter);
         getJsonData();
 
+    }
+
+    private void requestStoragePermission() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE)&&
+                ActivityCompat.shouldShowRequestPermissionRationale(this,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                ) {
+
+            new AlertDialog.Builder(this)
+                    .setTitle("Permission needed")
+                    .setMessage("This permission is needed because of this and that")
+                    .setPositiveButton("ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            ActivityCompat.requestPermissions(MainActivity.this,
+                                    new String[] {Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
+                        }
+                    })
+                    .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .create().show();
+
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[] {Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == STORAGE_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Permission GRANTED", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Permission DENIED", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private void getJsonData() {
