@@ -65,7 +65,7 @@ public class AccelerometerListener implements SensorEventListener {
                     data[i+1]=String.valueOf(sensorValues[i]);
                 }
                 writer.writeNext(data);
-
+                Log.d(TAG,"Writing data to"+mainActivity.ACCELEROMETER_SENSOR_FILE_NAME);
 
                 writer.close();
             } catch (IOException e) {

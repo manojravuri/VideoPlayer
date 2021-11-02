@@ -65,6 +65,7 @@ public class GyroscopeListener implements SensorEventListener {
                     data[i+1]=String.valueOf(sensorValues[i]);
                 }
                 writer.writeNext(data);
+                Log.d(TAG,"Writing data to"+mainActivity.GYRO_SENSOR_FILE_NAME);
 
 
                 writer.close();

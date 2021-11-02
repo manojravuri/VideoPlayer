@@ -141,7 +141,17 @@ public class Player extends AppCompatActivity {
         videoPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
+                setHasStartedWriting(true);
                 videoPlayer.start();
+                spiiner.setVisibility(View.GONE);
+            }
+        });
+
+        videoPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mediaPlayer) {
+                setHasStartedWriting(false);
+                //videoPlayer.start();
                 spiiner.setVisibility(View.GONE);
             }
         });

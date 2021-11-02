@@ -62,7 +62,7 @@ public class LightSensorListener implements SensorEventListener {
                     data[i+1]=String.valueOf(sensorValues[i]);
                 }
                 writer.writeNext(data);
-
+                Log.d(TAG,"Writing data to"+mainActivity.LIGHT_SENSOR_FILE_NAME);
 
                 writer.close();
             } catch (IOException e) {
