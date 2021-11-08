@@ -94,27 +94,6 @@ public class MainActivity extends AppCompatActivity {
             requestStoragePermission();
         }
 
-//        sensorManager=(SensorManager)getSystemService(Context.SENSOR_SERVICE);
-//
-//        accelerometer=sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-//
-//        gyroscope=sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-//
-//        lightSensor=sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
-//
-//        accelerometerListener=new AccelerometerListener(this);
-//
-//        gyroscopeListener=new GyroscopeListener(this);
-//
-//        lightSensorListener=new LightSensorListener(this);
-//
-//        sensorManager.registerListener(accelerometerListener,accelerometer,SensorManager.SENSOR_DELAY_NORMAL);
-//
-//        sensorManager.registerListener(gyroscopeListener,gyroscope,SensorManager.SENSOR_DELAY_NORMAL);
-//
-//        sensorManager.registerListener(lightSensorListener,lightSensor,SensorManager.SENSOR_DELAY_NORMAL);
-
-
         all_videos = new ArrayList<>();
 
         videoList = findViewById(R.id.videoList);

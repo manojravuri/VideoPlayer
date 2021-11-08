@@ -38,6 +38,8 @@ import com.stonybrook.videoplayer.listeners.AccelerometerListener;
 import com.stonybrook.videoplayer.listeners.GyroscopeListener;
 import com.stonybrook.videoplayer.listeners.LightSensorListener;
 
+import java.util.Locale;
+
 public class Player extends AppCompatActivity {
 
     public static final String TAG = "TAG";
@@ -60,11 +62,11 @@ public class Player extends AppCompatActivity {
 
     private LightSensorListener lightSensorListener;
 
-    public static final String LIGHT_SENSOR_FILE_NAME="light_sensor_data.csv";
+    public String LIGHT_SENSOR_FILE_NAME="light_sensor_data.csv";
 
-    public static final String GYRO_SENSOR_FILE_NAME="gyro_sensor_data.csv";
+    public String GYRO_SENSOR_FILE_NAME="gyro_sensor_data.csv";
 
-    public static final String ACCELEROMETER_SENSOR_FILE_NAME="accelerometer_sensor_data.csv";
+    public String ACCELEROMETER_SENSOR_FILE_NAME="accelerometer_sensor_data.csv";
 
     public boolean isHasStartedWriting() {
         return hasStartedWriting;
@@ -133,7 +135,7 @@ public class Player extends AppCompatActivity {
 
         title.setText(v.getTitle());
         desc.setText(v.getDescription());
-        Uri videoUrl = Uri.parse(v.getVideoUrl());
+        Uri videoUrl = Uri.parse("https://livesim.dashif.org/livesim/chunkdur_1/ato_7/testpic4_8s/Manifest.mpd");
         videoPlayer.setVideoURI(videoUrl);
         MediaController mc = new MediaController(this);
         //videoPlayer.setMediaController(mc);
@@ -141,6 +143,9 @@ public class Player extends AppCompatActivity {
         videoPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
+                GYRO_SENSOR_FILE_NAME=v.getTitle().toLowerCase(Locale.ROOT).replace(" ","_")+"_gyroscope.csv";
+                LIGHT_SENSOR_FILE_NAME=v.getTitle().toLowerCase(Locale.ROOT).replace(" ","_")+"_light_sensor.csv";
+                ACCELEROMETER_SENSOR_FILE_NAME=v.getTitle().toLowerCase(Locale.ROOT).replace(" ","_")+"_accelerometer.csv";
                 setHasStartedWriting(true);
                 videoPlayer.start();
                 spiiner.setVisibility(View.GONE);
