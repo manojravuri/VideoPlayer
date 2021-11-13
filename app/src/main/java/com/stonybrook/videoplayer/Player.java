@@ -135,7 +135,7 @@ public class Player extends AppCompatActivity {
 
         title.setText(v.getTitle());
         desc.setText(v.getDescription());
-        Uri videoUrl = Uri.parse("https://livesim.dashif.org/livesim/chunkdur_1/ato_7/testpic4_8s/Manifest.mpd");
+        Uri videoUrl = Uri.parse(v.getVideoUrl());
         videoPlayer.setVideoURI(videoUrl);
         MediaController mc = new MediaController(this);
         //videoPlayer.setMediaController(mc);
@@ -143,9 +143,9 @@ public class Player extends AppCompatActivity {
         videoPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
-                GYRO_SENSOR_FILE_NAME=v.getTitle().toLowerCase(Locale.ROOT).replace(" ","_")+"_gyroscope.csv";
-                LIGHT_SENSOR_FILE_NAME=v.getTitle().toLowerCase(Locale.ROOT).replace(" ","_")+"_light_sensor.csv";
-                ACCELEROMETER_SENSOR_FILE_NAME=v.getTitle().toLowerCase(Locale.ROOT).replace(" ","_")+"_accelerometer.csv";
+                GYRO_SENSOR_FILE_NAME=v.getTitle().toLowerCase(Locale.ROOT).replace(" ","_")+"_gyroscope_"+v.getVideoId()+".csv";
+                LIGHT_SENSOR_FILE_NAME=v.getTitle().toLowerCase(Locale.ROOT).replace(" ","_")+"_light_sensor_"+v.getVideoId()+".csv";
+                ACCELEROMETER_SENSOR_FILE_NAME=v.getTitle().toLowerCase(Locale.ROOT).replace(" ","_")+"_accelerometer_"+v.getVideoId()+".csv";
                 setHasStartedWriting(true);
                 videoPlayer.start();
                 spiiner.setVisibility(View.GONE);

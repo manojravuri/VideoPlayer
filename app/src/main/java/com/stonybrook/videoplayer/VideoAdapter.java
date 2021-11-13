@@ -1,6 +1,7 @@
 package com.stonybrook.videoplayer;
 
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -38,7 +39,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.ViewHolder> 
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") final int position) {
         holder.title.setText(allVideos.get(position).getTitle());
         Picasso.get().load(allVideos.get(position).getImageUrl()).into(holder.videoImage);
 
@@ -46,7 +47,9 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.ViewHolder> 
             @Override
             public void onClick(View v) {
                 Bundle b = new Bundle();
-                b.putSerializable("videoData",allVideos.get(position));
+                Video video=allVideos.get(position);
+                video.setVideoId(String.valueOf(position));
+                b.putSerializable("videoData",video);
                 Intent i = new Intent(context,Player.class);
                 i.putExtras(b);
                 v.getContext().startActivity(i);
