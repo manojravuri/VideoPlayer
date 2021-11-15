@@ -20,6 +20,7 @@ import android.hardware.SensorManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.MenuItem;
@@ -34,6 +35,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.MediaSourceEventListener;
+import com.google.android.exoplayer2.source.dash.DashMediaSource;
+import com.google.android.exoplayer2.ui.PlayerView;
+import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.stonybrook.videoplayer.listeners.AccelerometerListener;
 import com.stonybrook.videoplayer.listeners.GyroscopeListener;
 import com.stonybrook.videoplayer.listeners.LightSensorListener;
@@ -43,10 +52,11 @@ import java.util.Locale;
 public class Player extends AppCompatActivity {
 
     public static final String TAG = "TAG";
-    ProgressBar spiiner;
     ImageView fullScreenOp;
     FrameLayout frameLayout;
-    VideoView videoPlayer;
+    SimpleExoPlayer videoPlayer;
+
+    private String sampleUrl = "https://storage.googleapis.com/wvmedia/clear/h264/tears/tears.mpd";
 
     private SensorManager sensorManager;
 
@@ -117,9 +127,9 @@ public class Player extends AppCompatActivity {
 
 
         setContentView(R.layout.activity_player);
+        this.initializePlayer();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        spiiner = findViewById(R.id.progressBar);
         fullScreenOp = findViewById(R.id.fullScreenOp);
         frameLayout = findViewById(R.id.frameLayout);
 
@@ -131,53 +141,10 @@ public class Player extends AppCompatActivity {
 
         TextView title = findViewById(R.id.videoTitle);
         TextView desc = findViewById(R.id.videoDesc);
-        videoPlayer = findViewById(R.id.videoView);
 
         title.setText(v.getTitle());
         desc.setText(v.getDescription());
         Uri videoUrl = Uri.parse(v.getVideoUrl());
-        videoPlayer.setVideoURI(videoUrl);
-        MediaController mc = new MediaController(this);
-        //videoPlayer.setMediaController(mc);
-
-        videoPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mp) {
-                GYRO_SENSOR_FILE_NAME=v.getTitle().toLowerCase(Locale.ROOT).replace(" ","_")+"_gyroscope_"+v.getVideoId()+".csv";
-                LIGHT_SENSOR_FILE_NAME=v.getTitle().toLowerCase(Locale.ROOT).replace(" ","_")+"_light_sensor_"+v.getVideoId()+".csv";
-                ACCELEROMETER_SENSOR_FILE_NAME=v.getTitle().toLowerCase(Locale.ROOT).replace(" ","_")+"_accelerometer_"+v.getVideoId()+".csv";
-                setHasStartedWriting(true);
-                videoPlayer.start();
-                spiiner.setVisibility(View.GONE);
-            }
-        });
-
-        videoPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mediaPlayer) {
-                setHasStartedWriting(false);
-                //videoPlayer.start();
-                spiiner.setVisibility(View.GONE);
-            }
-        });
-
-        videoPlayer.setOnClickListener(new VideoView.OnClickListener()
-        {
-            @Override
-            public void onClick(View view) {
-                if(videoPlayer.isPlaying())
-                {
-                    setHasStartedWriting(false);
-                    videoPlayer.pause();
-                }
-                else
-                {
-                    setHasStartedWriting(true);
-                    videoPlayer.start();
-                }
-            }
-        });
-
 
         fullScreenOp.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -188,7 +155,7 @@ public class Player extends AppCompatActivity {
                 getSupportActionBar().hide();
                 fullScreenOp.setVisibility(View.GONE);
                 frameLayout.setLayoutParams(new ConstraintLayout.LayoutParams(new WindowManager.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)));
-                videoPlayer.setLayoutParams(new FrameLayout.LayoutParams(new WindowManager.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)));
+                //videoPlayer.setLayoutParams(new FrameLayout.LayoutParams(new WindowManager.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)));
             }
         });
 
@@ -255,11 +222,63 @@ public class Player extends AppCompatActivity {
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         int heightValue = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,220,getResources().getDisplayMetrics());
         frameLayout.setLayoutParams(new ConstraintLayout.LayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,heightValue)));
-        videoPlayer.setLayoutParams(new FrameLayout.LayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,heightValue)));
+        //videoPlayer.setLayoutParams(new FrameLayout.LayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,heightValue)));
         int orientation = getResources().getConfiguration().orientation;
 
         if(orientation == Configuration.ORIENTATION_PORTRAIT){
             super.onBackPressed();
         }
+    }
+
+    private final MediaSource buildMediaSource() {
+        DefaultDataSourceFactory dataSourceFactory = new DefaultDataSourceFactory((Context) this, "sample");
+        DashMediaSource dashMediaSource = new DashMediaSource(Uri.parse(this.sampleUrl), (DataSource.Factory) dataSourceFactory, (com.google.android.exoplayer2.source.dash.DashChunkSource.Factory) (new com.google.android.exoplayer2.source.dash.DefaultDashChunkSource.Factory((DataSource.Factory) dataSourceFactory)), (Handler) null, (MediaSourceEventListener) null);
+        return (MediaSource) dashMediaSource;
+    }
+
+    private final void initializePlayer() {
+        this.videoPlayer = (new SimpleExoPlayer.Builder((Context) this)).build();
+        PlayerView simpleExoPlayer = (PlayerView) this.findViewById(R.id.player_view);
+        if (simpleExoPlayer != null) {
+            simpleExoPlayer.setPlayer((com.google.android.exoplayer2.Player) this.videoPlayer);
+        }
+
+        MediaSource mediaSource = this.buildMediaSource();
+        if (mediaSource != null) {
+            if (this.videoPlayer != null) {
+                this.videoPlayer.prepare(mediaSource);
+            }
+        }
+
+    }
+
+    protected void onResume() {
+        super.onResume();
+        SimpleExoPlayer simpleExoPlayer = this.videoPlayer;
+        if (simpleExoPlayer != null) {
+            simpleExoPlayer.setPlayWhenReady(true);
+        }
+
+    }
+
+    protected void onStop() {
+        super.onStop();
+        SimpleExoPlayer simpleExoPlayer = this.videoPlayer;
+        if (simpleExoPlayer != null) {
+            simpleExoPlayer.setPlayWhenReady(false);
+        }
+
+        if (this.isFinishing()) {
+            this.releasePlayer();
+        }
+
+    }
+
+    private final void releasePlayer() {
+        SimpleExoPlayer simpleExoPlayer = this.videoPlayer;
+        if (simpleExoPlayer != null) {
+            simpleExoPlayer.release();
+        }
+
     }
 }
